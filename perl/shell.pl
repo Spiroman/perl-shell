@@ -11,6 +11,8 @@ require './rm.pl';
 require './cat.pl';
 # Import admin commands
 require './adduser.pl';
+require './groups.pl';
+require '.add_user_to_group.pl';
 # Import system commands
 require './kill.pl';
 require './ps.pl';
@@ -77,6 +79,18 @@ while (1) {
   # All admin commands
   elsif ($command =~ /^adduser/) {
     my $output = adduser(@args);
+    foreach my $message (@$output) {
+      print "$message";
+    }
+  }
+  elsif ($command =~ /^groups/) {
+    my $output = groups(@args);
+    foreach my $group (@$output) {
+      print "$group"
+    }
+  }
+  elsif ($command =~ /^add_user_to_group/) {
+    my $output = add_user_to_group(@args);
     foreach my $message (@$output) {
       print "$message";
     }
