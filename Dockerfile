@@ -6,6 +6,7 @@ RUN apt-get update && \
     python3 -m pip install --upgrade pip && \
     pip install ipython && \
     cpanm File::HomeDir && \
+    cpanm Proc::ProcessTable && \
     cpanm Term::ReadLine
 # CMD ["perl", "/root/perl/shell.pl"]
 CMD ["/bin/bash"]

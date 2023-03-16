@@ -2,11 +2,15 @@
 
 use Term::ReadLine;
 use File::HomeDir;
+# Import basic commands
 require './ls.pl';
 require './wc.pl';
 require './cp.pl';
 require './mv.pl';
 require './rm.pl';
+# Import system commands
+require './kill.pl';
+require './ps.pl';
 
 # Initialize modules
 my $term = Term::ReadLine->new('Shell');
@@ -40,7 +44,7 @@ while (1) {
         $element =~ s/^~/$home_dir/;
     }
   }
-  # If the input starts with 'ls', execute the ls.pl script
+  # All basic commands
   if ($command =~ /^ls/) {
     my $output = ls(@args);
     print $output;
@@ -61,6 +65,19 @@ while (1) {
     my $output = rm(@args);
     print $output;
   }
+  # All system commands
+  elsif ($command =~ /^ps/) {
+    my $output = ps();
+    foreach my $process (@$output) {
+      print "$process->{pid}\t$process->{name}\t$process->{status}\n";
+    }
+  }
+  elsif ($command =~ /^kill/) {
+    # 9 is the signal number for SIGKILL
+    my $output = my_kill(@args, 9);
+    print $output;
+  }
+  # Exit the shell
   elsif ($command eq 'exit' or $command eq 'q') {
     last;
   }
