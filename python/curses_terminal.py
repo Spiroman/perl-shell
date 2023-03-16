@@ -18,12 +18,10 @@ def main(stdscr):
     curses.curs_set(1)  # Set the cursor to be visible
     stdscr.timeout(-1)  # Block for user input
     stdscr.scrollok(True)
-    
-    stdscr.addstr(f'\nEnter your message (type "exit" to quit):\n')
 
     while True:
         # Get user input
-        input_str = get_input(stdscr, '> ')
+        input_str = get_input(stdscr, '\nEnter your message (type "exit" to quit): ')
 
         if input_str.lower() == 'exit':
             break
@@ -45,7 +43,7 @@ def main(stdscr):
             # Decode the JSON response and print it
             response = json.loads(data.decode('utf-8'))
             response_message = response['request']
-            stdscr.addstr(f"{response_message}\n")
+            stdscr.addstr(f"\nServer response: {response_message}\n")
         except Exception as e:
             stdscr.addstr(f"\nError: {e}\n")
 
