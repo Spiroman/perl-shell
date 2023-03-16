@@ -63,11 +63,7 @@ sub add_user_to_group {
     close($fh);
 
     push @messages, "User '$username' added to group '$groupname'.";
-    return @messages;
+    return \@messages;
 }
 
-# Usage example:
-my @messages = add_user_to_group("johndoe", "developers");
-foreach my $message (@messages) {
-    print $message . "\n";
-}
+1;
