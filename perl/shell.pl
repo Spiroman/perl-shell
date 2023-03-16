@@ -8,6 +8,9 @@ require './wc.pl';
 require './cp.pl';
 require './mv.pl';
 require './rm.pl';
+require './cat.pl';
+# Import admin commands
+require './adduser.pl';
 # Import system commands
 require './kill.pl';
 require './ps.pl';
@@ -64,6 +67,19 @@ while (1) {
   elsif ($command =~ /^rm/) {
     my $output = rm(@args);
     print $output;
+  }
+  elsif ($command =~ /^cat/) {
+    my $output = cat(@args);
+    for my $line (@$output) {
+      print $line;
+    }
+  }
+  # All admin commands
+  elsif ($command =~ /^adduser/) {
+    my $output = adduser(@args);
+    foreach my $message (@$output) {
+      print "$message";
+    }
   }
   # All system commands
   elsif ($command =~ /^ps/) {
