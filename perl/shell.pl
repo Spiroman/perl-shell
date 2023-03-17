@@ -12,10 +12,12 @@ require './cat.pl';
 # Import admin commands
 require './adduser.pl';
 require './groups.pl';
-require '.add_user_to_group.pl';
+require './add_user_to_group.pl';
 # Import system commands
 require './kill.pl';
 require './ps.pl';
+require './suspend.pl';
+require './resume.pl';
 
 # Initialize modules
 my $term = Term::ReadLine->new('Shell');
@@ -105,6 +107,14 @@ while (1) {
   elsif ($command =~ /^kill/) {
     # 9 is the signal number for SIGKILL
     my $output = my_kill(@args, 9);
+    print $output;
+  }
+  elsif ($command =~ /^suspend/) {
+    my $output = suspend(@args);
+    print $output;
+  }
+  elsif ($command =~ /^resume/) {
+    my $output = resume(@args);
     print $output;
   }
   # Exit the shell

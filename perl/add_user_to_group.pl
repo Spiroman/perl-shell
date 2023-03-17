@@ -1,69 +1,46 @@
 sub add_user_to_group {
     my ($username, $groupname) = @_;
-    my $group_file = '/etc/group';
-    my @messages;
 
-    # Check if the group exists
-    my $group_exists = 0;
-    open(my $fh, '<', $group_file) or push @messages, "Cannot open file $group_file: $!";
-    while (my $line = <$fh>) {
-        chomp $line;
-        my ($name, undef, $gid, $members) = split(/:/, $line);
-        if ($name eq $groupname) {
-            $group_exists = 1;
-            last;
+    # Open the group file and read the lines
+    my $group_file = "/etc/group";
+    open(my $group_handle, '<', $group_file) or die "Failed to open group file: $!";
+    my @group_lines = <$group_handle>;
+    close($group_handle);
+
+    # Find the line for the group
+    my ($group_line) = grep { /^$groupname:/ } @group_lines;
+    unless ($group_line) {
+        return "$groupname group not found";
+    }
+
+    # Extract the group ID and members
+    my ($name, $passwd, $gid, $members) = split(':', $group_line);
+    my @current_members = split(',', $members);
+
+    # Check if the user is already a member of the group
+    if (grep { $_ eq $username } @current_members) {
+        return "$username is already a member of group $groupname";
+    }
+
+    # Append the username to the members list
+    push @current_members, $username;
+
+    # Write the updated group line to a temporary file
+    my $temp_file = "$group_file.temp";
+    open(my $temp_handle, '>', $temp_file) or die "Failed to create temp file: $!";
+    foreach my $line (@group_lines) {
+        if ($line =~ /^$groupname:/) {
+            print $temp_handle "$name:$passwd:$gid:" . join(',', @current_members) . "\n";
+        } else {
+            print $temp_handle $line;
         }
     }
-    close($fh);
-    push @messages, "Group '$groupname' does not exist." unless $group_exists;
+    close($temp_handle);
 
-    # Check if the user exists
-    my $user_exists = 0;
-    open($fh, '<', '/etc/passwd') or push @messages, "Cannot open file /etc/passwd: $!";
-    while (my $line = <$fh>) {
-        chomp $line;
-        my ($name, undef, $uid, $gid) = split(/:/, $line);
-        if ($name eq $username) {
-            $user_exists = 1;
-            last;
-        }
-    }
-    close($fh);
-    push @messages, "User '$username' does not exist." unless $user_exists;
+    # Replace the original group file with the temporary file
+    rename($temp_file, $group_file) or die "Failed to rename temp file: $!";
 
-    # Check if the user is already in the group
-    my $user_in_group = 0;
-    open($fh, '<', $group_file) or push @messages, "Cannot open file $group_file: $!";
-    my @lines;
-    while (my $line = <$fh>) {
-        chomp $line;
-        my ($name, undef, undef, $members) = split(/:/, $line);
-        if ($name eq $groupname) {
-            my @group_members = split(/,/, $members);
-            foreach my $member (@group_members) {
-                if ($member eq $username) {
-                    $user_in_group = 1;
-                    last;
-                }
-            }
-            $members .= ",$username";
-            $line =~ s/$members/$members/;
-        }
-        push @lines, "$line\n";
-    }
-    close($fh);
-    if ($user_in_group) {
-        push @messages, "User '$username' is already a member of group '$groupname'.";
-        return @messages;
-    }
-
-    # Add the user to the group
-    open($fh, '>', $group_file) or push @messages, "Cannot open file $group_file: $!";
-    print $fh join("", @lines);
-    close($fh);
-
-    push @messages, "User '$username' added to group '$groupname'.";
-    return \@messages;
+    return "$username added to group $groupname";
 }
 
 1;
